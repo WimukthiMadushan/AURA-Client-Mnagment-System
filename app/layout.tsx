@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ScrollArea, Theme } from "@radix-ui/themes";
+import {  Theme } from "@radix-ui/themes";
+import NavBar from "./NavBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-            
+    <html lang="en">     
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NavBar />
         <Theme accentColor="crimson" grayColor="sand" radius="large" scaling="95%">
         {children}
         </Theme>

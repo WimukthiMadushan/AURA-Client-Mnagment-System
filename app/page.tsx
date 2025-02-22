@@ -1,16 +1,13 @@
 'use client';
 
-import NavBar from "./NavBar";
+import { Box } from "@radix-ui/themes";
 import Projects from "./Projects";
 
 export default function Home() {
-  
-
   return (
-      <>
-        <NavBar />
+      <Box>
         <Projects/>
-      </>
+      </Box>
 
   );
 }

@@ -8,9 +8,9 @@ import Logo from "./Images/Aura Logo-01.png";
 import Image from 'next/image';
 
 const NavBar = () => {
-    return (
+  return (
+      <Container>
       <nav className="border-b mb-5 px-5 py-3">
-        <Container>
           <Flex justify="between">
             <Flex align="center" gap="3">
               <Link href="/">
@@ -19,8 +19,8 @@ const NavBar = () => {
               <NavLinks />
             </Flex>
           </Flex>
-        </Container>
       </nav>
+      </Container>
     );
   };
 
