@@ -1,129 +1,101 @@
 'use client';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { AlertDialog, Badge, Button, Callout, Card, Container, Flex } from "@radix-ui/themes";
-import { Pencil, Trash2, Trash2Icon } from "lucide-react";
-import React, { useState } from 'react';
-import { format } from "date-fns";
-import { cn } from "@/lib/utils"
+import { Trash2Icon } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { format, differenceInDays } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { deleteComponentById } from "@/lib/firestoreOperations";
 
-const ComponentsTable = () => {
-  const [components, setComponents] = useState([
-    {
-      name: "ESP32 Microcontroller",
-      startDate: "2023-01-10",
-      endDate: "2023-02-10",
-      returnedDate: "",
-      penalty: 5,
-    },
-    {
-      name: "Raspberry Pi 4 Model B",
-      startDate: "2023-03-15",
-      endDate: "2026-04-15",
-      returnedDate: "",
-      penalty: 10,
-    },
-    {
-      name: "Arduino Uno",
-      startDate: "2023-02-01",
-      endDate: "2026-03-01",
-      returnedDate: "",
-      penalty: 3,
-    },
-    {
-      name: "Lithium-ion Battery",
-      startDate: "2023-04-01",
-      endDate: "2023-05-01",
-      returnedDate: "",
-      penalty: 7,
-    },
-    {
-      name: "Bluetooth Module HC-05",
-      startDate: "2023-02-10",
-      endDate: "2026-03-10",
-      returnedDate: "",
-      penalty: 2,
-    },
-    {
-      name: "OLED Display 0.96\"",
-      startDate: "2023-03-25",
-      endDate: "2023-04-25",
-      returnedDate: "",
-      penalty: 4,
-    },
-    {
-      name: "Raspberry Pi Zero W",
-      startDate: "2023-05-05",
-      endDate: "2024-06-05",
-      returnedDate: "",
-      penalty: 6,
-    },
-    {
-      name: "Servo Motor SG90",
-      startDate: "2023-06-01",
-      endDate: "2023-07-01",
-      returnedDate: "",
-      penalty: 3,
-    },
-    {
-      name: "Raspberry Pi Camera Module",
-      startDate: "2023-07-10",
-      endDate: "2023-08-10",
-      returnedDate: "",
-      penalty: 8,
-    },
-    {
-      name: "ESP8266 WiFi Module",
-      startDate: "2023-05-15",
-      endDate: "2023-06-15",
-      returnedDate: "",
-      penalty: 3,
-    },
-  ]);
+interface ComponentsTableProps {
+  components: {
+    id: string;
+    componentName: string;
+    startDate: string;
+    endDate: string;
+    returnedDate?: string;
+    panelty?: number;
+  }[];
+  fetchProject: () => void;
+}
 
-  const totalPenalty = components.reduce((sum, component) => sum + component.penalty, 0);
+const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => {
+  const [componentsState, setComponentsState] = useState(components);
 
-  const getStatus = (endDate: string) => {
-    const currentDate = new Date();
+  // Function to calculate penalty based on end date and returned date
+  const calculatePenalty = (endDate: string, returnedDate?: string) => {
+    const today = new Date();
     const endDateObj = new Date(endDate);
-    return endDateObj >= currentDate ? "Have Time" : "Overdue";
+    const returnDateObj = returnedDate ? new Date(returnedDate) : today;
+
+    // No penalty if returned date is earlier than or equal to the end date
+    if (returnDateObj <= endDateObj) {
+      return 0;
+    }
+
+    // If returned after the end date, calculate penalty based on the returned date
+    const daysLate = differenceInDays(returnDateObj, endDateObj);
+    return daysLate * 100;
   };
 
-  const handleReturnedDateChange = (index: number, date: Date) => {
-    setComponents((prevComponents) => {
-      const newComponents = [...prevComponents];
-      const returnedDate = format(date, "yyyy-MM-dd");
-      newComponents[index].returnedDate = returnedDate;
+  useEffect(() => {
+    const updatedComponents = components.map((component) => ({
+      ...component,
+      panelty: calculatePenalty(component.endDate, component.returnedDate),
+    }));
+    setComponentsState(updatedComponents);
+  }, [components]); 
 
-      // If returned date is before or equal to end date, reset penalty
-      const isReturnedOnTime =
-        new Date(newComponents[index].returnedDate) <= new Date(newComponents[index].endDate);
-      newComponents[index].penalty = isReturnedOnTime ? 0 : newComponents[index].penalty;
+  // Calculate total penalty
+  const totalPenalty = componentsState.reduce((sum, component) => sum + (component.panelty || 0), 0);
 
-      return newComponents;
-    });
+  // Determine status based on end date
+  const getStatus = (endDate: string) => {
+    return new Date(endDate) >= new Date() ? "Have Time" : "Overdue";
+  };
+
+  // Handle returned date change
+  const handleReturnedDateChange = async (index: number, date: Date) => {
+    const updatedComponents = [...componentsState];
+    const returnedDateString = format(date, "yyyy-MM-dd"); // Convert date to string
+
+    updatedComponents[index].returnedDate = returnedDateString;
+    updatedComponents[index].panelty = calculatePenalty(updatedComponents[index].endDate, returnedDateString);
+    setComponentsState(updatedComponents);  // Update state with new returned date
+  };
+
+  // Handle component deletion
+  const handleDeleteComponent = async (id: string) => {
+    try {
+      await deleteComponentById(id);
+      const updatedComponents = componentsState.filter((component) => component.id !== id);
+      setComponentsState(updatedComponents);
+      fetchProject();
+    } catch (error) {
+      console.error("Error deleting component:", error);
+    }
   };
 
   return (
     <Container>
-      <Callout.Root>
-        <Callout.Icon>
-          <InfoCircledIcon />
-        </Callout.Icon>
-        <Callout.Text>
-          You will need admin privileges to install and access this application.
-        </Callout.Text>
-      </Callout.Root>
+      {totalPenalty > 0 ? (
+        <Callout.Root>
+          <Callout.Icon>
+            <InfoCircledIcon />
+          </Callout.Icon>
+          <Callout.Text>You have a penalty of Rs. {totalPenalty}</Callout.Text>
+        </Callout.Root>
+      ) : (
+        <Callout.Root color="green">
+          <Callout.Icon>
+            <InfoCircledIcon />
+          </Callout.Icon>
+          <Callout.Text>You are good, no penalty. Keep it up!</Callout.Text>
+        </Callout.Root>
+      )}
 
       <Card my="4">
         <Table>
@@ -134,15 +106,15 @@ const ComponentsTable = () => {
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Penalty</TableHead>
+              <TableHead>Penalty (LKR)</TableHead>
               <TableHead>Returned Date</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {components.map((component, index) => (
+            {componentsState.map((component, index) => (
               <TableRow key={index}>
-                <TableCell>{component.name}</TableCell>
+                <TableCell>{component.componentName}</TableCell>
                 <TableCell>{component.startDate}</TableCell>
                 <TableCell>{component.endDate}</TableCell>
                 <TableCell>
@@ -150,7 +122,9 @@ const ComponentsTable = () => {
                     {getStatus(component.endDate)}
                   </Badge>
                 </TableCell>
-                <TableCell>${component.penalty}</TableCell>
+                <TableCell>
+                  {component.panelty === 0 ? "No Penalty" : `Rs. ${component.panelty}`}
+                </TableCell>
                 <TableCell>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -159,12 +133,9 @@ const ComponentsTable = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                        className={cn(
-                        "w-auto p-0 mt-2 rounded-lg shadow-lg",
-                        "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600",
-                        )}
-                        align="start"
-                        >
+                      className={cn("w-auto p-0 mt-2 rounded-lg shadow-lg", "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600")}
+                      align="start"
+                    >
                       <Calendar
                         mode="single"
                         selected={component.returnedDate ? new Date(component.returnedDate) : undefined}
@@ -177,12 +148,7 @@ const ComponentsTable = () => {
                 <TableCell>
                   <AlertDialog.Root>
                     <AlertDialog.Trigger>
-                      <Button
-                        size="2"
-                        variant="soft"
-                        color="red"
-                        className="rounded-full hover:bg-red-200"
-                      >
+                      <Button size="2" variant="soft" color="red" className="rounded-full hover:bg-red-200">
                         <Trash2Icon color="red" />
                       </Button>
                     </AlertDialog.Trigger>
@@ -191,17 +157,12 @@ const ComponentsTable = () => {
                       <AlertDialog.Description size="2">
                         Are you sure you want to delete this project? This action cannot be undone.
                       </AlertDialog.Description>
-
                       <Flex gap="3" mt="4" justify="end">
                         <AlertDialog.Cancel>
                           <Button variant="soft" color="gray">Cancel</Button>
                         </AlertDialog.Cancel>
-                        <AlertDialog.Action>
-                          <Button
-                            variant="solid"
-                            color="red"
-                            //onClick={() => deleteProject(project.id)}
-                          >
+                        <AlertDialog.Action onClick={() => handleDeleteComponent(component.id)}>
+                          <Button variant="solid" color="red">
                             Delete
                           </Button>
                         </AlertDialog.Action>
@@ -213,7 +174,7 @@ const ComponentsTable = () => {
             ))}
             <TableRow style={{ fontWeight: 'bold' }}>
               <TableCell>Total Penalty</TableCell>
-              <TableCell colSpan={3} className="text-right">${totalPenalty}</TableCell>
+              <TableCell colSpan={3} className="text-right">{`Rs. ${totalPenalty}`}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

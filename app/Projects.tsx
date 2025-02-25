@@ -4,12 +4,15 @@ import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Button, Flex, Text, Box, Container, TextField, Dialog } from '@radix-ui/themes';
 import React, { useState, useEffect } from 'react';
 import { getProjects, addProject , deleteProjectFromFirestoreById} from '@/lib/firestoreOperations';
+import { set } from 'date-fns';
+import LoadingSkelton from '@/components/LoadingSkelton';
 
 interface Project {
   id: number;
   projectName: string;
   projectDescription: string;
   status: string;
+  Engineers:  {EmploymentStatus: String, Email: String, Company: String, Name: String}[]
 }
 
 const Projects = () => {
@@ -21,16 +24,21 @@ const Projects = () => {
   });
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterdStatus, setFilterdStatus] = useState('All');
+  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const projectsPerPage = 5;
 
   useEffect(() => {
+    setIsLoading(true);
     const fetchProjects = async () => {
       try {
         const fetchedProjects: Project[] = await getProjects();
         setProjects(fetchedProjects);
       } catch (error) {
         setProjects([]);
+      }
+      finally {
+        setIsLoading(false);
       }
     };
     fetchProjects();
@@ -167,7 +175,7 @@ const Projects = () => {
           </Flex>
         </Box>
 
-        <ProjectCard projects={currentProjects} deleteProject={deleteProject} />
+        { isLoading ? <LoadingSkelton/>: <ProjectCard projects={currentProjects} deleteProject={deleteProject} />}
 
         {totalPages > 1 && (
           <Flex justify="center" gap="2" mt="4" mb="4">

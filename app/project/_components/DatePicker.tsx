@@ -13,8 +13,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-const DatePicker = () => {
+interface CompanyStatusDropdownProps {
+  onChange: (date: Date) => void;
+}
+
+const DatePicker: React.FC<CompanyStatusDropdownProps> = ({ onChange }) => {
   const [date, setDate] = React.useState<Date>()
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setDate(date);
+      onChange(date);
+    }
+  }
 
   return (
     <Popover>
@@ -42,7 +53,7 @@ const DatePicker = () => {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={handleDateChange}
           initialFocus
           className="rounded-lg" 
         />

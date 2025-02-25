@@ -21,7 +21,7 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ setSelectedStatus, curr
 
   return (
     <Select.Root value={selectedStatus} onValueChange={handleStatusChange}>
-      <Select.Trigger aria-label="Filter by status..." />
+      <Select.Trigger aria-label="Filter by status..." className='w-[10rem]' />
       <Select.Content>
         <Select.Group>
           <Select.Label>Status</Select.Label>

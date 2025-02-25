@@ -8,6 +8,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
+  Engineers:  {EmploymentStatus: String, Email: String, Company: String, Name: String}[]
 }
 
 interface ProjectCardProps {

@@ -2,11 +2,15 @@
 import { Select } from '@radix-ui/themes'
 import React, { useState } from 'react'
 
-const CompanyStatusDropdown = () => {
+interface CompanyStatusDropdownProps {
+  onChange: (value: string) => void;
+}
+const CompanyStatusDropdown: React.FC<CompanyStatusDropdownProps> = ({ onChange }) => {
   const [selectedStatus, setSelectedStatus] = useState('Company Owner');
 
   const handleStatusChange = (value: string) => {
     setSelectedStatus(value);
+    onChange(value);
   };
   return (
     <Select.Root value={selectedStatus} onValueChange={handleStatusChange}>

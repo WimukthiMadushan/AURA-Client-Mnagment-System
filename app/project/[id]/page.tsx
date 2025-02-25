@@ -1,45 +1,151 @@
-import ComponentsTable from '@/components/ComponentsTable'
-import DataListComponent from '@/components/DataList'
-import { Box, Button, Container, Flex, Text } from '@radix-ui/themes'
-import Controller from './../_components/Controller'
+'use client';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { Box, Callout, Container, Flex, Text } from '@radix-ui/themes';
 
-const projectDetailsPage = () => {
-  return (
-    <Container>
-      <Text as="div" size="6" weight="bold" className='mb-4'>
-         Project 01
-      </Text>
-      <Flex className='mb-4'>
-        <Box className="w-[30rem]">
-          <Text as="div" size="4" weight="bold" className='mb-4'>
-            Assign Engineers
-          </Text>
-          <DataListComponent />
-          <DataListComponent />
-          <DataListComponent />
-        </Box>
-        <Box className="w-[30rem]">
-          <Text as="div" size="4" weight="bold" className='mb-4'>
-            Clients
-          </Text>
-          <DataListComponent />
-          <DataListComponent />
-        </Box>
-        <Box className="w-[15rem]">
-          <Text as="div" size="4" weight="bold" className='mb-4'>
-            Controllers 
-          </Text>
-          <Flex direction={'column'} gapY={'2'}>
-            <Controller status='engineer' controllername="Add Engineers" label='Add a New Engineer' description='Here You can Add Engineers'/>
-            <Controller status='client' controllername="Add Clients" label='Add a New Client' description='Here You can Add Clients'/>
-            <Controller status ='component' controllername="Add Component" label='Add a New Component' description='Here You can Add Components'/>
-          </Flex>  
-        </Box>
-        
-      </Flex>
-      <ComponentsTable/>
-    </Container>
-  )
+import ComponentsTable from '@/components/ComponentsTable';
+import DataListComponent from '@/components/DataList';
+import Controller from './../_components/Controller';
+import { getProjectFromId } from '@/lib/firestoreOperations';
+import { ShieldCheck } from 'lucide-react';
+
+interface Engineer {
+  EmploymentStatus: string;
+  Email: string;
+  Company: string;
+  Name: string;
 }
 
-export default projectDetailsPage
+interface Client {
+  NIC: string;
+  Email: string;
+  Name: string;
+}
+
+interface Component {
+  id: string;
+  componentName: string;
+  startDate: string;
+  endDate: string;
+  returnedDate: string;
+  panelty: number;
+ }
+
+interface Project {
+  id: number;
+  projectName: string;
+  projectDescription: string;
+  status: string;
+  Engineers: Engineer[];
+  Clients: Client[];
+  Components: Component[];
+}
+
+const ProjectDetailsPage = () => {
+  const { id } = useParams();
+  const [project, setProject] = useState<Project | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProject = async () => {
+    if (!id) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const fetchedData = await getProjectFromId(Number(id));
+      setProject(fetchedData || null);
+    } catch (err) {
+      setError('Failed to fetch project data.');
+      setProject(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProject();
+  }, [id]);
+
+  return (
+    <Container>
+      {isLoading ? (
+        <Text size="4" color="gray">
+          Loading project details...
+        </Text>
+      ) : error ? (
+        <Text size="4" color="red">
+          {error}
+        </Text>
+      ) : (
+        <>
+          <Text as="div" size="6" weight="bold" className="mb-4">
+            {project?.projectName || 'Project Not Found'}
+          </Text>
+          <Flex className="mb-4">
+            {/* Engineers Section */}
+            <Box className="w-[30rem]">
+              <Text as="div" size="4" weight="bold" className="mb-4">
+                Assign Engineers
+              </Text>
+              {project?.Engineers?.length ? (
+                project.Engineers.map((engineer) => (
+                  <DataListComponent key={engineer.Email} data={engineer} type="engineer" />
+                ))
+              ) : (
+                <Text as="div" size="3" color="gray">
+                  No Engineers Assigned
+                </Text>
+              )}
+            </Box>
+
+            {/* Clients Section */}
+            <Box className="w-[30rem]">
+              <Text as="div" size="4" weight="bold" className="mb-4">
+                Clients
+              </Text>
+              {project?.Clients?.length ? (
+                project.Clients.map((client) => (
+                  <DataListComponent key={client.Email} data={client} type="client" />
+                ))
+              ) : (
+                <Text as="div" size="3" color="gray">
+                  No Clients Assigned
+                </Text>
+              )}
+            </Box>
+
+            {/* Controllers Section */}
+            <Box className="w-[15rem]">
+              <Text as="div" size="4" weight="bold" className="mb-4">
+                Controllers
+              </Text>
+              <Flex direction="column" gap="2">
+                <Controller status="engineer" controllername="Add Engineers" label="Add a New Engineer" description="Here You can Add Engineers" fetchProject={fetchProject}/>
+                <Controller status="client" controllername="Add Clients" label="Add a New Client" description="Here You can Add Clients" fetchProject={fetchProject}/>
+                <Controller status="component" controllername="Add Component" label="Add a New Component" description="Here You can Add Components" fetchProject={fetchProject}/>
+              </Flex>
+            </Box>
+          </Flex>
+
+          {/* Components Table */}
+          {project?.Components?.length ? (
+            <ComponentsTable components={project.Components} fetchProject={fetchProject} />
+          ) : (
+                 <Callout.Root color='blue'>
+	                  <Callout.Icon>
+		                  <ShieldCheck/>
+	                  </Callout.Icon>
+	                  <Callout.Text>
+		                  No Components hired
+	                  </Callout.Text>
+                </Callout.Root>
+          )}
+        </>
+      )}
+    </Container>
+  );
+};
+
+export default ProjectDetailsPage;
