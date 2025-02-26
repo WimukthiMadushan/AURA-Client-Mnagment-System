@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { deleteComponentById } from "@/lib/firestoreOperations";
+import { useAuth } from "@/app/Hooks/AuthContextHook";
+import { toast } from "react-toastify";
 
 interface ComponentsTableProps {
   components: {
@@ -24,6 +26,8 @@ interface ComponentsTableProps {
 
 const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => {
   const [componentsState, setComponentsState] = useState(components);
+
+  const {role} = useAuth();
 
   // Function to calculate penalty based on end date and returned date
   const calculatePenalty = (endDate: string, returnedDate?: string) => {
@@ -73,9 +77,11 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
       await deleteComponentById(id);
       const updatedComponents = componentsState.filter((component) => component.id !== id);
       setComponentsState(updatedComponents);
+      toast.success("Component deleted successfully!", { position: "bottom-right" });
       fetchProject();
     } catch (error) {
       console.error("Error deleting component:", error);
+      toast.error("An error occurred while deleting the component.", { position: "bottom-right" });
     }
   };
 
@@ -107,8 +113,13 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
               <TableHead>End Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Penalty (LKR)</TableHead>
-              <TableHead>Returned Date</TableHead>
-              <TableHead>Actions</TableHead>
+              {role === 'admin' && (
+                <>
+                  <TableHead>Returned Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </>) 
+                }
+              
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -125,51 +136,53 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
                 <TableCell>
                   {component.panelty === 0 ? "No Penalty" : `Rs. ${component.panelty}`}
                 </TableCell>
-                <TableCell>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="2" className="w-[70%]">
-                        {component.returnedDate ? format(new Date(component.returnedDate), "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={cn("w-auto p-0 mt-2 rounded-lg shadow-lg", "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600")}
-                      align="start"
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={component.returnedDate ? new Date(component.returnedDate) : undefined}
-                        onSelect={(date) => handleReturnedDateChange(index, date!)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </TableCell>
-                <TableCell>
-                  <AlertDialog.Root>
-                    <AlertDialog.Trigger>
-                      <Button size="2" variant="soft" color="red" className="rounded-full hover:bg-red-200">
-                        <Trash2Icon color="red" />
-                      </Button>
-                    </AlertDialog.Trigger>
-                    <AlertDialog.Content maxWidth="450px">
-                      <AlertDialog.Title>Delete Project</AlertDialog.Title>
-                      <AlertDialog.Description size="2">
-                        Are you sure you want to delete this project? This action cannot be undone.
-                      </AlertDialog.Description>
-                      <Flex gap="3" mt="4" justify="end">
-                        <AlertDialog.Cancel>
-                          <Button variant="soft" color="gray">Cancel</Button>
-                        </AlertDialog.Cancel>
-                        <AlertDialog.Action onClick={() => handleDeleteComponent(component.id)}>
-                          <Button variant="solid" color="red">
-                            Delete
+                { role === 'admin' && (
+                  <>
+                    <TableCell>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="2" className="w-[70%]">
+                          {component.returnedDate ? format(new Date(component.returnedDate), "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={cn("w-auto p-0 mt-2 rounded-lg shadow-lg", "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600")}
+                        align="start"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={component.returnedDate ? new Date(component.returnedDate) : undefined}
+                          onSelect={(date) => handleReturnedDateChange(index, date!)}
+                          initialFocus />
+                      </PopoverContent>
+                    </Popover>
+                  </TableCell><TableCell>
+                      <AlertDialog.Root>
+                        <AlertDialog.Trigger>
+                          <Button size="2" variant="soft" color="red" className="rounded-full hover:bg-red-200">
+                            <Trash2Icon color="red" />
                           </Button>
-                        </AlertDialog.Action>
-                      </Flex>
-                    </AlertDialog.Content>
-                  </AlertDialog.Root>
-                </TableCell>
+                        </AlertDialog.Trigger>
+                        <AlertDialog.Content maxWidth="450px">
+                          <AlertDialog.Title>Delete Project</AlertDialog.Title>
+                          <AlertDialog.Description size="2">
+                            Are you sure you want to delete this project? This action cannot be undone.
+                          </AlertDialog.Description>
+                          <Flex gap="3" mt="4" justify="end">
+                            <AlertDialog.Cancel>
+                              <Button variant="soft" color="gray">Cancel</Button>
+                            </AlertDialog.Cancel>
+                            <AlertDialog.Action onClick={() => handleDeleteComponent(component.id)}>
+                              <Button variant="solid" color="red">
+                                Delete
+                              </Button>
+                            </AlertDialog.Action>
+                          </Flex>
+                        </AlertDialog.Content>
+                      </AlertDialog.Root>
+                    </TableCell>
+                  </>
+                )}
               </TableRow>
             ))}
             <TableRow style={{ fontWeight: 'bold' }}>

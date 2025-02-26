@@ -3,7 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {  Theme } from "@radix-ui/themes";
 import NavBar from "./NavBar";
-import Head from "next/head";
+import { AuthProvider } from "./Hooks/AuthContextHook";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,20 +29,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">  
-      <Head>
-        <link rel="icon" href="/Aura Logo-02.png" />
-      </Head>  
+    <html lang="en">   
+      <AuthProvider>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        
-        <NavBar />
         <Theme accentColor="crimson" grayColor="sand" radius="large" scaling="95%">
-        {children}
-        </Theme>  
+          <NavBar />
+          {children}
+          </Theme> 
+        <ToastContainer />  
       </body>
-    
+      </AuthProvider>
     </html>
   );
 }

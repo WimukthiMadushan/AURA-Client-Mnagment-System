@@ -1,3 +1,4 @@
+import { useAuth } from "@/app/Hooks/AuthContextHook";
 import { Box, Card, Badge, Flex, Text, Button, AlertDialog } from "@radix-ui/themes";
 import { Trash2Icon } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,8 @@ const ProjectCard = ({ projects, deleteProject }: ProjectCardProps) => {
     }
   };
 
+  const { role } = useAuth();
+
   return (
     <Box className="w-[40rem]">
       {projects.map((project) => (
@@ -57,7 +60,7 @@ const ProjectCard = ({ projects, deleteProject }: ProjectCardProps) => {
                 </Box>
               </Link>
 
-              <AlertDialog.Root>
+              {role == 'admin' && <AlertDialog.Root>
                 <AlertDialog.Trigger>
                   <Button
                     size="2"
@@ -91,6 +94,7 @@ const ProjectCard = ({ projects, deleteProject }: ProjectCardProps) => {
                   </Flex>
                 </AlertDialog.Content>
               </AlertDialog.Root>
+              }
             </Flex>
           </Card>
         </Box>

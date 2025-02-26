@@ -8,6 +8,8 @@ import DataListComponent from '@/components/DataList';
 import Controller from './../_components/Controller';
 import { getProjectFromId } from '@/lib/firestoreOperations';
 import { ShieldCheck } from 'lucide-react';
+import ProjectPageLoadingSkelton from '../_components/ProjectPageLoadingSkelton';
+import { useAuth } from '@/app/Hooks/AuthContextHook';
 
 interface Engineer {
   EmploymentStatus: string;
@@ -47,6 +49,8 @@ const ProjectDetailsPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { role } = useAuth();
+
   const fetchProject = async () => {
     if (!id) return;
 
@@ -71,9 +75,7 @@ const ProjectDetailsPage = () => {
   return (
     <Container>
       {isLoading ? (
-        <Text size="4" color="gray">
-          Loading project details...
-        </Text>
+        <ProjectPageLoadingSkelton/>
       ) : error ? (
         <Text size="4" color="red">
           {error}
@@ -116,8 +118,9 @@ const ProjectDetailsPage = () => {
               )}
             </Box>
 
-            {/* Controllers Section */}
-            <Box className="w-[15rem]">
+                {/* Controllers Section */}
+                {role == 'admin' && (
+                   <Box className="w-[15rem]">
               <Text as="div" size="4" weight="bold" className="mb-4">
                 Controllers
               </Text>
@@ -126,7 +129,9 @@ const ProjectDetailsPage = () => {
                 <Controller status="client" controllername="Add Clients" label="Add a New Client" description="Here You can Add Clients" fetchProject={fetchProject}/>
                 <Controller status="component" controllername="Add Component" label="Add a New Component" description="Here You can Add Components" fetchProject={fetchProject}/>
               </Flex>
-            </Box>
+            </Box>)
+                  }
+           
           </Flex>
 
           {/* Components Table */}
