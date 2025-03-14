@@ -24,19 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
-  // Listen to auth state changes and set the user and role
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const userRole = await getUserRole(currentUser.uid);
-        setRole(userRole);
-      } else {
-        setRole(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Register a new user and save their role to Firestore
   const registerUser = async (email: string, password: string, role: string) => {
@@ -71,18 +58,6 @@ const loginUser = async (email: string, password: string) => {
     }
   };
 
-useEffect(() => {
-    const token = getCookie('token');
-    if (token) {
-      auth.onAuthStateChanged(async (firebaseUser) => {
-        if (firebaseUser) {
-          const userRole = await getUserRole(firebaseUser.uid);
-          setUser(firebaseUser);
-          setRole(userRole);
-        }
-      });
-    }
-  }, []);
 
 const logoutUser = async () => {
     try {
