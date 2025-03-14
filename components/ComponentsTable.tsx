@@ -76,12 +76,6 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
     setComponentsState(updatedComponents);
 
     const success = await updateReturnedDate(component.id, returnedDateString);
-
-    if (success) {
-      toast.success("Returned date updated successfully!", { position: "bottom-right" });
-    } else {
-      toast.error("Failed to update returned date in Firestore.", { position: "bottom-right" });
-    }
   };
 
   const handleDeleteComponent = async (id: string) => {
@@ -109,7 +103,6 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
 
       <Card my="4">
         <Table>
-          <TableCaption>A list of your Renting Components.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Component Name</TableHead>
@@ -153,7 +146,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
                             <Button variant="outline">{component.returnedDate ? format(new Date(component.returnedDate), "PPP") : "Pick a date"}</Button>
                           </PopoverTrigger>
                           <PopoverContent>
-                            <Calendar mode="single" selected={component.returnedDate ? new Date(component.returnedDate) : undefined} onSelect={(date) => handleReturnedDateChange(index, date!)} />
+                            <Calendar mode="single" selected={component.returnedDate ? new Date(component.returnedDate) : undefined} onSelect={(date) => handleReturnedDateChange(index, date!)} className="bg-white"/>
                           </PopoverContent>
                         </Popover>
                       </TableCell>
@@ -169,6 +162,16 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
             })}
           </TableBody>
         </Table>
+        <Flex justify='start' className="mt-4">
+          <Card>
+            <div className="font-bold mb-4">
+              Total Overall Cost
+            </div>
+            <div className="text-lg">
+              Rs. {totalOverallCost}
+            </div>
+          </Card>
+        </Flex>
       </Card>
     </Container>
   );

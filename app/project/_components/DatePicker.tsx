@@ -19,24 +19,26 @@ interface CompanyStatusDropdownProps {
 
 const DatePicker: React.FC<CompanyStatusDropdownProps> = ({ onChange }) => {
   const [date, setDate] = React.useState<Date>()
+  const [open, setOpen] = React.useState<boolean>(false)
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setDate(date);
-      onChange(date);
+      setDate(date)
+      onChange(date)
+      setOpen(false)
     }
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           className={cn(
-            "w-full justify-start text-left font-medium rounded-lg transition-all",
+            "w-full justify-start text-left font-medium transition-all",
             "border border-gray-300 dark:border-gray-600 rounded-lg",
             !date && "text-muted-foreground",
-            "hover:border-pink-500 focus:ring-2 focus:ring-pink-500" 
+            "hover:border-pink-500 focus:ring-2 focus:ring-pink-500"
           )}
         >
           <CalendarIcon className="mr-2" />
@@ -46,7 +48,7 @@ const DatePicker: React.FC<CompanyStatusDropdownProps> = ({ onChange }) => {
       <PopoverContent
         className={cn(
           "w-auto p-0 mt-2 rounded-lg shadow-lg",
-          "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600",
+          "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
         )}
         align="start"
       >
@@ -55,7 +57,7 @@ const DatePicker: React.FC<CompanyStatusDropdownProps> = ({ onChange }) => {
           selected={date}
           onSelect={handleDateChange}
           initialFocus
-          className="rounded-lg" 
+          className="rounded-lg"
         />
       </PopoverContent>
     </Popover>

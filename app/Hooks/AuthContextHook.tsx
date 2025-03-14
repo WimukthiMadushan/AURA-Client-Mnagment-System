@@ -6,6 +6,7 @@ import { auth, db } from './../../lib/firabase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { destroyCookie, setCookie } from 'nookies';
 import { toast } from "react-toastify";
+import { getCookie } from 'cookies-next';
 
 // Define the authentication context type
 interface AuthContextType {
@@ -51,32 +52,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Log in an existing user and fetch their role
-  const loginUser = async (email: string, password: string) => {
+const loginUser = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const userRole = await getUserRole(user.uid);
       if (user) {
         const token = await user.getIdToken();
-        setCookie(null, 'token', token, {
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7,
-        });
-    }
+        setCookie(null, 'token', token, { path: '/', maxAge: 60 * 60 * 24 * 7 });
+      }
       setUser(user);
       setRole(userRole);
-      toast.success("Logged in successfully!",{position: "bottom-right"});
+      toast.success("Logged in successfully!", { position: "bottom-right" });
     } catch (error) {
-      console.error('Error logging in:', error);
+      toast.error("Error logging in!", { position: "bottom-right" });
+      console.error(error);
     }
   };
 
-  // Log out the current user
-  const logoutUser = async () => {
+useEffect(() => {
+    const token = getCookie('token');
+    if (token) {
+      auth.onAuthStateChanged(async (firebaseUser) => {
+        if (firebaseUser) {
+          const userRole = await getUserRole(firebaseUser.uid);
+          setUser(firebaseUser);
+          setRole(userRole);
+        }
+      });
+    }
+  }, []);
+
+const logoutUser = async () => {
     try {
       await signOut(auth);
-      destroyCookie(null, 'token', {
+    destroyCookie(null, 'token', {
       path: '/', 
     });
       setUser(null);

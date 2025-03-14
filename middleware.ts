@@ -3,14 +3,12 @@ import { useAuth } from './app/Hooks/AuthContextHook';
 
 export function middleware(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
-
     if (!token) {
         return NextResponse.redirect(new URL('/', req.url));
     }
     return NextResponse.next();
 }
 
-// Apply middleware only to protected routes
 export const config = {
     matcher: '/project/:path*',
 };

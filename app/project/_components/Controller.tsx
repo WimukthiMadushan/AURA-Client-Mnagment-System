@@ -143,10 +143,6 @@ const Controller = ({ controllername, label, description, status, fetchProject }
           {status === 'projectManager' && (
             <Box>
               <label>
-                <Text as="div" size="2" mb="1" weight="bold">Employment Status</Text>
-                <CompanyStatusDropdown onChange={(value) => setFormData((prev) => ({ ...prev, employmentStatus: value }))} />
-              </label>
-              <label>
                 <Text as="div" size="2" mb="1" weight="bold">Company</Text>
                 <TextField.Root name="company" placeholder="Enter company name" value={formData.company} onChange={handleChange} />
               </label>
@@ -154,6 +150,10 @@ const Controller = ({ controllername, label, description, status, fetchProject }
                 <Text as="div" size="2" mb="1" weight="bold">Mobile</Text>
                 <TextField.Root name="mobile" placeholder="Enter Mobile Number" value={formData.mobile} onChange={handleChange} />
               </label>
+              <label>
+                <Text as="div" size="2" mb="1" weight="bold">Employment Status</Text>
+                <CompanyStatusDropdown onChange={(value) => setFormData((prev) => ({ ...prev, employmentStatus: value }))} />
+              </label>  
             </Box>
           )}
 
