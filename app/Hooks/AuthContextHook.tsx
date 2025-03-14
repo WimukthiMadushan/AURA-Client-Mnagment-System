@@ -1,12 +1,11 @@
 'use client';
 
-import { createContext, useState, useEffect, useContext } from 'react';
-import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
+import { createContext, useState, useContext } from 'react';
+import { User,signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './../../lib/firabase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { destroyCookie, setCookie } from 'nookies';
 import { toast } from "react-toastify";
-import { getCookie } from 'cookies-next';
 
 // Define the authentication context type
 interface AuthContextType {
@@ -23,7 +22,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
-
 
   // Register a new user and save their role to Firestore
   const registerUser = async (email: string, password: string, role: string) => {
