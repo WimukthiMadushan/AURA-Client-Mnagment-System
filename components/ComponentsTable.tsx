@@ -1,8 +1,8 @@
 'use client';
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody,TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { AlertDialog, Badge, Button, Callout, Card, Container, Flex } from "@radix-ui/themes";
+import { Badge, Button, Callout, Card, Container, Flex } from "@radix-ui/themes";
 import { Trash2Icon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from "date-fns";
@@ -76,6 +76,12 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
     setComponentsState(updatedComponents);
 
     const success = await updateReturnedDate(component.id, returnedDateString);
+    if (success) {
+      toast.success("Returned date updated successfully!", { position: "bottom-right" });
+      fetchProject();
+    } else {
+      toast.error("An error occurred while updating the returned date.", { position: "bottom-right" });
+    }
   };
 
   const handleDeleteComponent = async (id: string) => {

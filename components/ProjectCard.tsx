@@ -9,7 +9,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
-  Engineers:  {EmploymentStatus: String, Email: String, Company: String, Name: String}[]
+  ProjectManager: { Email: string; Company: string; Name: string; Mobile: string };
 }
 
 interface ProjectCardProps {

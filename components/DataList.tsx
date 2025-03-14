@@ -1,10 +1,10 @@
-import { Badge, Link, DataList, Card } from '@radix-ui/themes';
+import { Link, DataList, Card } from '@radix-ui/themes';
 
 interface ProjectManager {
   Email: string;
   Company: string;
   Name: string;
-  Mobile: String;
+  Mobile: string;
 }
 
 interface Client {

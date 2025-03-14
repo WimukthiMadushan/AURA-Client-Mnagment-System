@@ -1,7 +1,7 @@
 // lib/firestoreOperations.js
 import { toast } from 'react-toastify';
 import { db } from './firabase';
-import { collection, getDocs, addDoc, query, where, deleteDoc, getDoc, doc, updateDoc, arrayRemove, DocumentData, DocumentSnapshot, arrayUnion } from 'firebase/firestore';
+import { collection, getDocs, addDoc, query, where, deleteDoc, updateDoc, arrayRemove, DocumentData, DocumentSnapshot, arrayUnion, FieldValue } from 'firebase/firestore';
 
 
 interface Project {
@@ -9,7 +9,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
-  ProjectManager: { Email: string, Company: string, Name: string, Mobiel: string };
+  ProjectManager: { Email: string, Company: string, Name: string, Mobile: string };
   Clients: { NIC: string, Email: string, Name: string }[];
   Components: { id: string, componentName: string, startDate: string, endDate: string, returnedDate: string, panelty: number }[];
 }
@@ -50,6 +50,7 @@ const addProject = async (projectData: { id: number, projectName: string, projec
       projectDescription: projectData.projectDescription,
       status: projectData.status,
     });
+    console.log("Project added with ID: ", docRef.id);
     toast.success("Project added successfully!", { position: "bottom-right", });
   } catch (error) {
     console.error("Error adding project: ", error);
@@ -73,7 +74,7 @@ const deleteProjectFromFirestoreById = async (id: number) => {
   }
 };
 
-const addData = async (projectId: number, dataToSave: any, status: string) => {
+const addData = async (projectId: number, dataToSave: { ProjectManager: FieldValue; Clients?: undefined; Components?: undefined; } | { Clients: FieldValue; ProjectManager?: undefined; Components?: undefined; } | { Components: FieldValue; ProjectManager?: undefined; Clients?: undefined; } | undefined, status: string) => {
   try {
     const projectsRef = collection(db, "projects");
     const q = query(projectsRef, where("id", "==", projectId));
@@ -83,7 +84,11 @@ const addData = async (projectId: number, dataToSave: any, status: string) => {
     const projectDoc = projectSnapshot.docs[0];
     const projectRef = projectDoc.ref;
 
-    await updateDoc(projectRef, dataToSave);
+    if (dataToSave) {
+      await updateDoc(projectRef, dataToSave);
+    } else {
+      throw new Error('Data to save is undefined');
+    }
     toast.success(`${status.charAt(0).toUpperCase() + status.slice(1)} added successfully!`, {
       position: "bottom-right",
     });
@@ -99,12 +104,12 @@ const deleteComponentById = async (componentId: string) => {
     const projectSnapshot = await getDocs(projectsRef);
 
     let projectToUpdate: DocumentData | null = null;
-    let componentToRemove: any = null;
+    let componentToRemove = null;
 
     // Find the project that contains the component
     projectSnapshot.forEach((doc) => {
       const projectData = doc.data();
-      const component = projectData.Components?.find((comp: any) => comp.id === componentId);
+      const component = projectData.Components?.find((comp: { id: string; }) => comp.id === componentId);
 
       if (component) {
         projectToUpdate = doc;
@@ -140,20 +145,18 @@ const deleteComponentById = async (componentId: string) => {
     });
   }
 };
-
 export const updateReturnedDate = async (componentId: string, returnedDate: string) => {
-  //console.log(`Updating returned date for component: ${componentId}`);
   try {
     const projectsRef = collection(db, "projects");
     const projectSnapshot = await getDocs(projectsRef);
 
     let projectToUpdate: DocumentSnapshot | null = null;
-    let componentToUpdate: any = null;
+    let componentToUpdate: { id: string; componentName: string; startDate: string; endDate: string; returnedDate: string; panelty: number } | null = null as unknown as { id: string; componentName: string; startDate: string; endDate: string; returnedDate: string; panelty: number };
 
     // Find the project that contains the component
     projectSnapshot.forEach((doc) => {
       const projectData = doc.data();
-      const component = projectData.Components?.find((comp: any) => comp.id === componentId);
+      const component = projectData.Components?.find((comp: { id: string; }) => comp.id === componentId);
 
       if (component) {
         projectToUpdate = doc;
@@ -175,8 +178,15 @@ export const updateReturnedDate = async (componentId: string, returnedDate: stri
       Components: arrayRemove(componentToUpdate),
     });
 
-    // Update the component with the new returned date
+    if (!componentToUpdate) {
+      console.error("Component not found.");
+      toast.error("Component not found.", { position: "bottom-right" });
+      return false;
+    }
+
+    // Now it's safe to spread componentToUpdate
     const updatedComponent = { ...componentToUpdate, returnedDate };
+
 
     await updateDoc(projectRef, {
       Components: arrayUnion(updatedComponent),
@@ -190,6 +200,7 @@ export const updateReturnedDate = async (componentId: string, returnedDate: stri
     return false;
   }
 };
+
 
 
 

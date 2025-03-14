@@ -9,12 +9,13 @@ const Login = () => {
 
   const { loginUser } = useAuth();
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
       await loginUser(email, password);
-    } catch (error: any) {
-      toast.error(error.message, {position: "bottom-right"});
+    } catch (error) {
+      console.error(error);
+      toast.error("Login failed", { position: "bottom-right" });
     }
   };
 

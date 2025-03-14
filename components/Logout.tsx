@@ -13,8 +13,9 @@ const Logout = () => {
             await logoutUser();
             toast.success("Logged out successfully!", { position: "bottom-right" });
             router.push("/");
-        } catch (error: any) {
-            toast.error(error.message, { position: "bottom-right" });
+        } catch (error) {
+            console.error(error);
+            toast.error("An unknown error occurred", { position: "bottom-right" });
         }
     };
 

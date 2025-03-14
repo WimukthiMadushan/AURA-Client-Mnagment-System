@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Callout, Container, Flex, Text } from '@radix-ui/themes';
 import ComponentsTable from '@/components/ComponentsTable';
@@ -11,32 +11,32 @@ import ProjectPageLoadingSkelton from '../_components/ProjectPageLoadingSkelton'
 import { useAuth } from '@/app/Hooks/AuthContextHook';
 
 interface ProjectManager {
-  Email: String;
-  Company: String;
-  Name: String;
-  Mobile: String;
+  Email: string;
+  Company: string;
+  Name: string;
+  Mobile: string;
 }
 
 interface Client {
-  NIC: String;
-  Email: String;
-  Name: String;
+  NIC: string;
+  Email: string;
+  Name: string;
 }
 
 interface Component {
-  id: String;
-  componentName: String;
-  startDate: String;
-  endDate: String;
-  returnedDate: String;
+  id: string;
+  componentName: string;
+  startDate: string;
+  endDate: string;
+  returnedDate: string;
   panelty: number;
  }
 
 interface Project {
   id: number;
-  projectName: String;
-  projectDescription: String;
-  status: String;
+  projectName: string;
+  projectDescription: string;
+  status: string;
   ProjectManager: ProjectManager;
   Clients: Client[];
   Components: Component[];
@@ -46,29 +46,29 @@ const ProjectDetailsPage = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<String | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { role } = useAuth();
 
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     if (!id) return;
     setIsLoading(true);
     setError(null);
     try {
       const fetchedData = await getProjectFromId(Number(id));
-      //console.log("Main Page",fetchedData)
       setProject(fetchedData || null);
     } catch (err) {
+      console.error(err);
       setError('Failed to fetch project data.');
       setProject(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]); 
 
   useEffect(() => {
     fetchProject();
-  }, [id]);
+  }, [id, fetchProject]);
 
   return (
     <Container>
@@ -90,7 +90,7 @@ const ProjectDetailsPage = () => {
                 Assigned Project Manager
               </Text>
               {project?.ProjectManager ? (
-                  <DataListComponent key={project.ProjectManager[0].Email} data={project.ProjectManager[0]} type="projectManager" />
+                  <DataListComponent key={project.ProjectManager.Email} data={project.ProjectManager} type="projectManager" />
               ) : (
                 <Text as="div" size="3" color="gray">
                   No Project Manager Assigned

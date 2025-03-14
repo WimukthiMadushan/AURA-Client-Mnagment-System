@@ -11,7 +11,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
-  Engineers:  {EmploymentStatus: String, Email: String, Company: String, Name: String}[]
+  ProjectManager: { Email: string; Company: string; Name: string; Mobile: string };
 }
 
 const RegisterMembers = () => {
@@ -26,14 +26,14 @@ const RegisterMembers = () => {
     fetchProjects();
   };
 
-  const handleSignup = async (e: any) => {
+  const handleSignup = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     fetchProjects();
     try {
       await registerUser(email, password, role);
       toast.success(`User registered successfully as ${role}!`, { position: "bottom-right" });
-    } catch (error: any) {
-      toast.error(error.message, { position: "bottom-right" });
+    } catch (error) {
+      toast.error(String(error), { position: "bottom-right" });
     }
   };
 
@@ -42,6 +42,7 @@ const RegisterMembers = () => {
       const fetchedProjects: Project[] = await getProjects();
       setProjects(fetchedProjects);
     } catch (error) {
+      console.error('Error fetching projects:', error);
       setProjects([]);
     }
   };
