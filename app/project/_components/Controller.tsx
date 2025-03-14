@@ -5,7 +5,7 @@ import CompanyStatusDropdown from './CompanyStatusDropdown';
 import DatePicker from './DatePicker';
 import { useParams } from 'next/navigation';
 import { arrayUnion } from 'firebase/firestore';
-import { addData, getProjectFromId, getProjects } from '@/lib/firestoreOperations';
+import { addData} from '@/lib/firestoreOperations';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
@@ -46,7 +46,7 @@ const Controller = ({ controllername, label, description, status, fetchProject }
       return;
     }
 
-    let dataToSave: any;
+    let dataToSave;
 
     if (status === "projectManager") {
       dataToSave = {

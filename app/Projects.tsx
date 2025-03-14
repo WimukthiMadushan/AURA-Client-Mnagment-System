@@ -10,10 +10,10 @@ import { toast } from 'react-toastify';
 
 interface Project {
   id: number;
-  projectName: string;
-  projectDescription: string;
-  status: string;
-  Engineers: { EmploymentStatus: String; Email: String; Company: String; Name: String }[];
+  projectName: String;
+  projectDescription: String;
+  status: String;
+  ProjectManager: { Email: String; Company: String; Name: String; Mobile: String }[];
 }
 
 const Projects = () => {
@@ -23,7 +23,7 @@ const Projects = () => {
     projectField: '',
     status: 'Not Yet Returned'
   });
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<String>('');
   const [filterdStatus, setFilterdStatus] = useState('All');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +38,6 @@ const Projects = () => {
     const fetchProjects = async () => {
       try {
         const fetchedProjects: Project[] = await getProjects();
-        console.log(fetchedProjects);
 
         if (role === 'admin') {
           setProjects(fetchedProjects);

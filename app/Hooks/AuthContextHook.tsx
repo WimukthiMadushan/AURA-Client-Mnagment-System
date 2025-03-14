@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(currentUser);
       if (currentUser) {
         const userRole = await getUserRole(currentUser.uid);
+        setRole(userRole);
       } else {
         setRole(null);
       }

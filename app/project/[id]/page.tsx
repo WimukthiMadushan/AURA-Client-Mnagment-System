@@ -11,32 +11,32 @@ import ProjectPageLoadingSkelton from '../_components/ProjectPageLoadingSkelton'
 import { useAuth } from '@/app/Hooks/AuthContextHook';
 
 interface ProjectManager {
-  Email: string;
-  Company: string;
-  Name: string;
+  Email: String;
+  Company: String;
+  Name: String;
   Mobile: String;
 }
 
 interface Client {
-  NIC: string;
-  Email: string;
-  Name: string;
+  NIC: String;
+  Email: String;
+  Name: String;
 }
 
 interface Component {
-  id: string;
-  componentName: string;
-  startDate: string;
-  endDate: string;
-  returnedDate: string;
+  id: String;
+  componentName: String;
+  startDate: String;
+  endDate: String;
+  returnedDate: String;
   panelty: number;
  }
 
 interface Project {
   id: number;
-  projectName: string;
-  projectDescription: string;
-  status: string;
+  projectName: String;
+  projectDescription: String;
+  status: String;
   ProjectManager: ProjectManager;
   Clients: Client[];
   Components: Component[];
@@ -46,7 +46,7 @@ const ProjectDetailsPage = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<String | null>(null);
 
   const { role } = useAuth();
 
