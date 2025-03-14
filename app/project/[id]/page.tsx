@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Callout, Container, Flex, Text } from '@radix-ui/themes';
-
 import ComponentsTable from '@/components/ComponentsTable';
 import DataListComponent from '@/components/DataList';
 import Controller from './../_components/Controller';
@@ -11,11 +10,11 @@ import { ShieldCheck } from 'lucide-react';
 import ProjectPageLoadingSkelton from '../_components/ProjectPageLoadingSkelton';
 import { useAuth } from '@/app/Hooks/AuthContextHook';
 
-interface Engineer {
-  EmploymentStatus: string;
+interface ProjectManager {
   Email: string;
   Company: string;
   Name: string;
+  Mobile: String;
 }
 
 interface Client {
@@ -38,7 +37,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
-  Engineers: Engineer[];
+  ProjectManager: ProjectManager;
   Clients: Client[];
   Components: Component[];
 }
@@ -53,12 +52,11 @@ const ProjectDetailsPage = () => {
 
   const fetchProject = async () => {
     if (!id) return;
-
     setIsLoading(true);
     setError(null);
-
     try {
       const fetchedData = await getProjectFromId(Number(id));
+      //console.log("Main Page",fetchedData)
       setProject(fetchedData || null);
     } catch (err) {
       setError('Failed to fetch project data.');
@@ -89,15 +87,13 @@ const ProjectDetailsPage = () => {
             {/* Engineers Section */}
             <Box className="w-[30rem]">
               <Text as="div" size="4" weight="bold" className="mb-4">
-                Assign Engineers
+                Assigned Project Manager
               </Text>
-              {project?.Engineers?.length ? (
-                project.Engineers.map((engineer) => (
-                  <DataListComponent key={engineer.Email} data={engineer} type="engineer" />
-                ))
+              {project?.ProjectManager ? (
+                  <DataListComponent key={project.ProjectManager[0].Email} data={project.ProjectManager[0]} type="projectManager" />
               ) : (
                 <Text as="div" size="3" color="gray">
-                  No Engineers Assigned
+                  No Project Manager Assigned
                 </Text>
               )}
             </Box>
@@ -125,13 +121,11 @@ const ProjectDetailsPage = () => {
                 Controllers
               </Text>
               <Flex direction="column" gap="2">
-                <Controller status="engineer" controllername="Add Engineers" label="Add a New Engineer" description="Here You can Add Engineers" fetchProject={fetchProject}/>
+                <Controller status="projectManager" controllername="Add Project Manager" label="Add a New Project Manager" description="Here You can Add Project Manager" fetchProject={fetchProject}/>
                 <Controller status="client" controllername="Add Clients" label="Add a New Client" description="Here You can Add Clients" fetchProject={fetchProject}/>
                 <Controller status="component" controllername="Add Component" label="Add a New Component" description="Here You can Add Components" fetchProject={fetchProject}/>
               </Flex>
-            </Box>)
-                  }
-           
+            </Box>)} 
           </Flex>
 
           {/* Components Table */}

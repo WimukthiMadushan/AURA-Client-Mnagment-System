@@ -1,6 +1,7 @@
 // lib/firestoreOperations.js
+import { toast } from 'react-toastify';
 import { db } from './firabase';
-import { collection, getDocs, addDoc, query, where, deleteDoc, getDoc, doc, updateDoc, arrayRemove, DocumentData, DocumentSnapshot } from 'firebase/firestore';
+import { collection, getDocs, addDoc, query, where, deleteDoc, getDoc, doc, updateDoc, arrayRemove, DocumentData, DocumentSnapshot, arrayUnion } from 'firebase/firestore';
 
 
 interface Project {
@@ -8,7 +9,7 @@ interface Project {
   projectName: string;
   projectDescription: string;
   status: string;
-  Engineers: { EmploymentStatus: string, Email: string, Company: string, Name: string }[]
+  ProjectManager: { Email: string, Company: string, Name: string, Mobiel: string };
   Clients: { NIC: string, Email: string, Name: string }[];
   Components: { id: string, componentName: string, startDate: string, endDate: string, returnedDate: string, panelty: number }[];
 }
@@ -49,9 +50,12 @@ const addProject = async (projectData: { id: number, projectName: string, projec
       projectDescription: projectData.projectDescription,
       status: projectData.status,
     });
+    toast.success("Project added successfully!", { position: "bottom-right", });
   } catch (error) {
     console.error("Error adding project: ", error);
+    toast.error("Failed to add project.", { position: "bottom-right", });
     throw new Error('Failed to add project');
+
   }
 };
 
@@ -70,7 +74,6 @@ const deleteProjectFromFirestoreById = async (id: number) => {
 };
 
 const addData = async (projectId: number, dataToSave: any, status: string) => {
-  console.log("project id:", projectId);
   try {
     const projectsRef = collection(db, "projects");
     const q = query(projectsRef, where("id", "==", projectId));
@@ -81,19 +84,17 @@ const addData = async (projectId: number, dataToSave: any, status: string) => {
     const projectRef = projectDoc.ref;
 
     await updateDoc(projectRef, dataToSave);
-    console.log("Updated data:", dataToSave);
-    alert(`${status.charAt(0).toUpperCase() + status.slice(1)} added successfully!`);
+    toast.success(`${status.charAt(0).toUpperCase() + status.slice(1)} added successfully!`, {
+      position: "bottom-right",
+    });
   } catch (error) {
     console.error("Error adding data to project:", error);
-    alert("Failed to add data.");
+    toast.error(`Failed to add ${status}.`, { position: "bottom-right", });
   }
 };
 
 const deleteComponentById = async (componentId: string) => {
   try {
-    console.log("Deleting component with ID:", componentId);
-
-    // Get all projects
     const projectsRef = collection(db, "projects");
     const projectSnapshot = await getDocs(projectsRef);
 
@@ -113,7 +114,9 @@ const deleteComponentById = async (componentId: string) => {
 
     if (!projectToUpdate || !componentToRemove) {
       console.error("Component not found in any project.");
-      alert("Component not found.");
+      toast.error("Component not found.", {
+        position: "bottom-right",
+      });
       return;
     }
 
@@ -125,11 +128,69 @@ const deleteComponentById = async (componentId: string) => {
       Components: arrayRemove(componentToRemove),
     });
 
-    console.log("Component deleted successfully.");
+    //console.log("Component deleted successfully.");
+    toast.success("Component deleted successfully.", {
+      position: "bottom-right",
+    });
   } catch (error) {
     console.error("Error deleting component:", error);
-    alert("Failed to delete component.");
+    //alert("Failed to delete component.");
+    toast.error("Failed to delete component.", {
+      position: "bottom-right",
+    });
   }
 };
+
+export const updateReturnedDate = async (componentId: string, returnedDate: string) => {
+  //console.log(`Updating returned date for component: ${componentId}`);
+  try {
+    const projectsRef = collection(db, "projects");
+    const projectSnapshot = await getDocs(projectsRef);
+
+    let projectToUpdate: DocumentSnapshot | null = null;
+    let componentToUpdate: any = null;
+
+    // Find the project that contains the component
+    projectSnapshot.forEach((doc) => {
+      const projectData = doc.data();
+      const component = projectData.Components?.find((comp: any) => comp.id === componentId);
+
+      if (component) {
+        projectToUpdate = doc;
+        componentToUpdate = component;
+      }
+    });
+
+    if (!projectToUpdate || !componentToUpdate) {
+      console.error("Component not found in any project.");
+      toast.error("Component not found.", { position: "bottom-right" });
+      return false;
+    }
+
+    // Get reference to the Firestore document
+    const projectRef = (projectToUpdate as DocumentSnapshot).ref;
+
+    // Remove old component and add updated one
+    await updateDoc(projectRef, {
+      Components: arrayRemove(componentToUpdate),
+    });
+
+    // Update the component with the new returned date
+    const updatedComponent = { ...componentToUpdate, returnedDate };
+
+    await updateDoc(projectRef, {
+      Components: arrayUnion(updatedComponent),
+    });
+    console.log("Returned date updated successfully!");
+    toast.success("Returned date updated successfully.", { position: "bottom-right" });
+    return true;
+  } catch (error) {
+    console.error("Error updating returned date:", error);
+    toast.error("Failed to update returned date.", { position: "bottom-right" });
+    return false;
+  }
+};
+
+
 
 export { getProjects, addProject, deleteProjectFromFirestoreById, getProjectFromId, addData, deleteComponentById };

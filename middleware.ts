@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { useAuth } from './app/Hooks/AuthContextHook';
 
 export function middleware(req: NextRequest) {
-    const token = req.cookies.get('authToken')?.value; // Adjust based on your auth strategy
+    const token = req.cookies.get('token')?.value;
 
     if (!token) {
         return NextResponse.redirect(new URL('/', req.url));
     }
-
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (!payload.role || !['admin', 'user'].includes(payload.role)) {
-            return NextResponse.redirect(new URL('/unauthorized', req.url));
-        }
-    } catch (error) {
-        return NextResponse.redirect(new URL('/', req.url));
-    }
-
     return NextResponse.next();
 }
 

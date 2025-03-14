@@ -197,8 +197,7 @@ const Projects = () => {
   ) : null
 )}
 
-
-        {isLoading ? <LoadingSkelton /> : <ProjectCard projects={currentProjects} deleteProject={deleteProject} />}
+        {isLoading && role ? <LoadingSkelton /> : <ProjectCard projects={currentProjects} deleteProject={deleteProject} />}
 
         {totalPages > 1 && (
           <Flex justify="center" gap="2" mt="4" mb="4">

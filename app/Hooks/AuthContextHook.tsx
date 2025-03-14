@@ -4,6 +4,8 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './../../lib/firabase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { destroyCookie, setCookie } from 'nookies';
+import { toast } from "react-toastify";
 
 // Define the authentication context type
 interface AuthContextType {
@@ -55,9 +57,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const userRole = await getUserRole(user.uid);
-
+      if (user) {
+        const token = await user.getIdToken();
+        setCookie(null, 'token', token, {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+        });
+    }
       setUser(user);
       setRole(userRole);
+      toast.success("Logged in successfully!",{position: "bottom-right"});
     } catch (error) {
       console.error('Error logging in:', error);
     }
@@ -67,8 +76,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutUser = async () => {
     try {
       await signOut(auth);
+      destroyCookie(null, 'token', {
+      path: '/', 
+    });
       setUser(null);
       setRole(null);
+
     } catch (error) {
       console.error('Error logging out:', error);
     }

@@ -13,6 +13,7 @@ import { useAuth } from "./Hooks/AuthContextHook";
 
 const NavBar = () => {
   const { role } = useAuth();
+  console.log("inside navbar", role);
   return (
     <nav className="border-b mb-5 px-5 py-3">
       <Container>

@@ -13,7 +13,6 @@ const Login = () => {
     e.preventDefault();
     try {
       await loginUser(email, password);
-      toast.success("Logged in successfully!",{position: "bottom-right"});
     } catch (error: any) {
       toast.error(error.message, {position: "bottom-right"});
     }

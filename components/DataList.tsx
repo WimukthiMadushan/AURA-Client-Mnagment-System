@@ -1,10 +1,10 @@
 import { Badge, Link, DataList, Card } from '@radix-ui/themes';
 
-interface Engineer {
-  EmploymentStatus: string;
+interface ProjectManager {
   Email: string;
   Company: string;
   Name: string;
+  Mobile: String;
 }
 
 interface Client {
@@ -14,18 +14,18 @@ interface Client {
 }
 
 interface DataListComponentProps {
-  data: Engineer | Client;
-  type: 'engineer' | 'client';
+  data: ProjectManager | Client;
+  type: 'projectManager' | 'client';
 }
 
 const DataListComponent = ({ data, type }: DataListComponentProps) => {
+  console.log("DataListComponent", data)
   return (
-      
-      <Card className="cursor-pointer w-[20rem] gap-2 mb-2">
+      <Card className="cursor-pointer w-[22rem] gap-2 mb-2">
         <DataList.Root>
           <DataList.Item>
             <DataList.Label minWidth="88px">Name</DataList.Label>
-            <DataList.Value>{ data.Name}</DataList.Value>
+            <DataList.Value>{data.Name}</DataList.Value>
           </DataList.Item>
           <DataList.Item>
             <DataList.Label minWidth="88px">Email</DataList.Label>
@@ -34,21 +34,19 @@ const DataListComponent = ({ data, type }: DataListComponentProps) => {
               </DataList.Value>
           </DataList.Item>
 
-          {type === 'engineer' ? (
+          {type === 'projectManager' ? (
           <>
             <DataList.Item>
-              <DataList.Label minWidth="88px">Status</DataList.Label>
+              <DataList.Label minWidth="90px">Mobile</DataList.Label>
               <DataList.Value>
-                <Badge color="jade" variant="soft" radius="full">
-                  {(data as Engineer).EmploymentStatus}
-                </Badge>
+                <Link target="https://www.auradigitallabs.com/">{(data as ProjectManager).Mobile}</Link>
               </DataList.Value>
             </DataList.Item>
 
             <DataList.Item>
               <DataList.Label minWidth="88px">Company</DataList.Label>
               <DataList.Value>
-                <Link target="_blank">{(data as Engineer).Company}</Link>
+                <Link target="https://www.auradigitallabs.com/">{(data as ProjectManager).Company}</Link>
               </DataList.Value>
             </DataList.Item>
           </>

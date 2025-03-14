@@ -7,12 +7,13 @@ import { useParams } from 'next/navigation';
 import { arrayUnion } from 'firebase/firestore';
 import { addData, getProjectFromId, getProjects } from '@/lib/firestoreOperations';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 
 interface ControllerProps {
   controllername: string;
   label: string;
   description: string;
-  status: 'engineer' | 'client' | 'component';
+  status: 'projectManager' | 'client' | 'component';
   fetchProject: () => void;
 }
 
@@ -27,6 +28,7 @@ const Controller = ({ controllername, label, description, status, fetchProject }
     nic: '',
     employmentStatus: 'Company Owner',
     company: '',
+    mobile:'',
     componentName: '',
     startDate: '',
     endDate: '',
@@ -40,21 +42,21 @@ const Controller = ({ controllername, label, description, status, fetchProject }
 
   const handleSave = async () => {
     if (!projectId) {
-      alert("Project ID is missing!");
+      toast.info('Please select a project first');
       return;
     }
 
     let dataToSave: any;
 
-    if (status === "engineer") {
-      // Prepare the engineer object to add to the Engineers array
+    if (status === "projectManager") {
       dataToSave = {
-        Engineers: arrayUnion({
+        ProjectManager: arrayUnion({
           id: Math.random().toString(36).substr(2, 9),
           Name: formData.name,
           Email: formData.email,
           EmploymentStatus: formData.employmentStatus,
           Company: formData.company,
+          Mobile:formData.mobile
         }),
       };
     } else if (status === "client") {
@@ -89,6 +91,7 @@ const Controller = ({ controllername, label, description, status, fetchProject }
         nic: "",
         employmentStatus: "Company Owner",
         company: "",
+        mobile:"",
         componentName: "",
         startDate: "",
         endDate: "",
@@ -96,8 +99,9 @@ const Controller = ({ controllername, label, description, status, fetchProject }
         panelty: 0,
       });
       fetchProject();
+
     } catch (error) {
-      console.error("Error saving data:", error);
+      console.error('Error adding document: ', error);
     }
   };
 
@@ -136,7 +140,7 @@ const Controller = ({ controllername, label, description, status, fetchProject }
           )}
 
           {/* Engineer Specific Fields */}
-          {status === 'engineer' && (
+          {status === 'projectManager' && (
             <Box>
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">Employment Status</Text>
@@ -145,6 +149,10 @@ const Controller = ({ controllername, label, description, status, fetchProject }
               <label>
                 <Text as="div" size="2" mb="1" weight="bold">Company</Text>
                 <TextField.Root name="company" placeholder="Enter company name" value={formData.company} onChange={handleChange} />
+              </label>
+              <label>
+                <Text as="div" size="2" mb="1" weight="bold">Mobile</Text>
+                <TextField.Root name="mobile" placeholder="Enter Mobile Number" value={formData.mobile} onChange={handleChange} />
               </label>
             </Box>
           )}
