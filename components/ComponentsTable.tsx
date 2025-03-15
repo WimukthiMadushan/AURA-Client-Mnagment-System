@@ -42,10 +42,9 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
   const calculateHiredCost = (startDate: string, endDate: string, returnedDate?: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const returned = returnedDate ? new Date(returnedDate) : new Date();
+    const returned = returnedDate ? new Date(returnedDate) : end;
 
-    const isLate = returned > end;
-    const dailyRate = isLate ? 150 : 100;
+    const dailyRate = 100;
 
     return Math.max(differenceInDays(returned, start), 0) * dailyRate;
   };
