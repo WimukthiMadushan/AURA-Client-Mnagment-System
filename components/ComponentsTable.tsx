@@ -36,12 +36,12 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
     if (returnDateObj <= endDateObj) return 0;
 
     const daysLate = differenceInDays(returnDateObj, endDateObj);
-    return daysLate * 100;
+    return daysLate * 150;
   };
 
   const calculateHiredCost = (startDate: string, endDate: string, returnedDate?: string) => {
     const finalDate = returnedDate ? new Date(returnedDate) : new Date(endDate);
-    return Math.max(differenceInDays(finalDate, new Date(startDate)), 0) * 100;
+    return Math.max(differenceInDays(finalDate, new Date(startDate)), 0) * 150;
   };
 
   useEffect(() => {

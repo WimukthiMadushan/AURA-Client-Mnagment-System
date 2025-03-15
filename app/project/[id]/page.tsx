@@ -57,7 +57,7 @@ const ProjectDetailsPage = () => {
     try {
       const fetchedData = await getProjectFromId(Number(id));
       setProject(fetchedData || null);
-      console.log("inside page", project)
+      //console.log("inside page", project)
     } catch (err) {
       console.error(err);
       setError('Failed to fetch project data.');
