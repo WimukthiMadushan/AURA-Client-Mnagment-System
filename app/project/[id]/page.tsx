@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { Box, Callout, Container, Flex, Text } from '@radix-ui/themes';
+import { Box, Callout, Flex, Text } from '@radix-ui/themes';
 import ComponentsTable from '@/components/ComponentsTable';
 import DataListComponent from '@/components/DataList';
 import Controller from './../_components/Controller';
@@ -72,7 +72,7 @@ const ProjectDetailsPage = () => {
   }, [id, fetchProject]);
 
   return (
-    <Container>
+    <Box className="w-[100%] px-[8rem]">
       {isLoading ? (
         <ProjectPageLoadingSkelton/>
       ) : error ? (
@@ -144,7 +144,7 @@ const ProjectDetailsPage = () => {
           )}
         </>
       )}
-    </Container>
+    </Box>
   );
 };
 

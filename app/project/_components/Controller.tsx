@@ -34,6 +34,8 @@ const Controller = ({ controllername, label, description, status, fetchProject }
     endDate: '',
     returnedDate: '',
     panelty: 0,
+    dailyRentalCost: 0,
+    dailyPaneltyCost: 0,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,6 +80,8 @@ const Controller = ({ controllername, label, description, status, fetchProject }
           endDate: formData.endDate,
           returnedDate: formData.returnedDate,
           panelty: 0,
+          dailyRentalCost: formData.dailyRentalCost,
+          dailyPaneltyCost: formData.dailyPaneltyCost,
         }),
       };
     }
@@ -97,6 +101,8 @@ const Controller = ({ controllername, label, description, status, fetchProject }
         endDate: "",
         returnedDate: "",
         panelty: 0,
+        dailyRentalCost: 0,
+        dailyPaneltyCost: 0,
       });
       fetchProject();
 
@@ -164,6 +170,20 @@ const Controller = ({ controllername, label, description, status, fetchProject }
                 <Text as="div" size="2" mb="1" weight="bold">Component Name</Text>
                 <TextField.Root name="componentName" placeholder="Enter Component Name" value={formData.componentName} onChange={handleChange} />
               </label>
+              <label>
+                <Text as="div" size="2" mb="1" mt="2" weight="bold">Daily Rental Cost</Text>
+                <TextField.Root name="dailyRentalCost" placeholder="Enter Daily Rental Cost" value={formData.dailyRentalCost} onChange={handleChange} />
+              </label>
+              <label>
+  <Text as="div" size="2" mb="1" mt="2" weight="bold">Daily Penalty Cost</Text>
+  <TextField.Root
+    name="dailyPaneltyCost"
+    placeholder="Enter Daily Penalty Cost"
+    value={formData.dailyPaneltyCost}
+    onChange={handleChange}
+  />
+</label>
+
               <Flex gapX="3" mt="3">
                 <label className="flex-1">
                   <Text as="div" size="2" mb="1" weight="bold">Start Date</Text>

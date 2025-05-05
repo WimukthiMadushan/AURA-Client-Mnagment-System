@@ -2,7 +2,7 @@
 
 import { Table, TableBody,TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { Badge, Button, Callout, Card, Container, Flex } from "@radix-ui/themes";
+import { Badge, Button, Callout, Card, Flex ,Box} from "@radix-ui/themes";
 import { Trash2Icon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from "date-fns";
@@ -20,6 +20,8 @@ interface ComponentsTableProps {
     endDate: string;
     returnedDate?: string;
     penalty?: number;
+    dailyRentalCost?: number;
+    dailyPaneltyCost?: number;
   }[];
   fetchProject: () => void;
 }
@@ -28,7 +30,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
   const [componentsState, setComponentsState] = useState(components);
   const { role } = useAuth();
 
-  const calculatePenalty = (endDate: string, returnedDate?: string) => {
+  const calculatePenalty = (endDate: string, returnedDate?: string, dailyPanelty?:number) => {
     const today = new Date();
     const endDateObj = new Date(endDate);
     const returnDateObj = returnedDate ? new Date(returnedDate) : today;
@@ -36,15 +38,15 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
     if (returnDateObj <= endDateObj) return 0;
 
     const daysLate = differenceInDays(returnDateObj, endDateObj);
-    return daysLate * 150;
+    return daysLate * (dailyPanelty || 0);
   };
 
-  const calculateHiredCost = (startDate: string, endDate: string, returnedDate?: string) => {
+  const calculateHiredCost = (startDate: string, endDate: string, returnedDate?: string, dailyRentalCost?: number) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const returned = returnedDate ? new Date(returnedDate) : end;
 
-    const dailyRate = 100;
+    const dailyRate = dailyRentalCost || 0; 
 
     return Math.max(differenceInDays(returned, start), 0) * dailyRate;
   };
@@ -52,7 +54,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
   useEffect(() => {
     const updatedComponents = components.map((component) => ({
       ...component,
-      penalty: calculatePenalty(component.endDate, component.returnedDate),
+      penalty: calculatePenalty(component.endDate, component.returnedDate, component.dailyPaneltyCost),
     }));
     setComponentsState(updatedComponents);
   }, [components]);
@@ -60,7 +62,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
   const totalPenalty = componentsState.reduce((sum, component) => sum + (component.penalty || 0), 0);
 
   const totalOverallCost = componentsState.reduce((sum, component) => {
-    const hiredCost = calculateHiredCost(component.startDate, component.endDate, component.returnedDate);
+    const hiredCost = calculateHiredCost(component.startDate, component.endDate, component.returnedDate, component.dailyRentalCost);
     return sum + hiredCost + (component.penalty || 0);
   }, 0);
 
@@ -102,7 +104,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
   };
 
   return (
-    <Container>
+    <Box className="w-[100%]">
       <Callout.Root color={totalPenalty > 0 ? "red" : "green"}>
         <Callout.Icon>
           <InfoCircledIcon />
@@ -120,8 +122,10 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Daily Rental (LKR)</TableHead>
               <TableHead>Hired Cost (LKR)</TableHead>
-              <TableHead>Penalty (LKR)</TableHead>
+              <TableHead>Daily Penalty(LKR)</TableHead>
+              <TableHead>Total Penalty (LKR)</TableHead>
               <TableHead>Total Cost (LKR)</TableHead>
               {role === 'admin' && (
                 <>
@@ -133,7 +137,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
           </TableHeader>
           <TableBody>
             {componentsState.map((component, index) => {
-              const hiredCost = calculateHiredCost(component.startDate, component.endDate, component.returnedDate);
+              const hiredCost = calculateHiredCost(component.startDate, component.endDate, component.returnedDate, component.dailyRentalCost || 0);
               const totalCost = hiredCost + (component.penalty || 0);
 
               return (
@@ -146,9 +150,11 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
                       {getStatus(component.endDate)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{hiredCost}</TableCell>
+                  <TableCell className="text-center">{ component.dailyRentalCost }</TableCell>
+                  <TableCell className="text-center">{hiredCost}</TableCell>
+                  <TableCell className="text-center">{component.dailyPaneltyCost}</TableCell>
                   <TableCell>{component.penalty === 0 ? "No Penalty" : `Rs. ${component.penalty}`}</TableCell>
-                  <TableCell>{totalCost}</TableCell>
+                  <TableCell className="text-center">{totalCost}</TableCell>
                   {role === 'admin' && (
                     <>
                       <TableCell>
@@ -184,7 +190,7 @@ const ComponentsTable = ({ components, fetchProject }: ComponentsTableProps) => 
           </Card>
         </Flex>
       </Card>
-    </Container>
+    </Box>
   );
 };
 
